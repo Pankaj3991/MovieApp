@@ -20,22 +20,28 @@ export default function AuthPage() {
     setError("");
 
     try {
-      let bodyData: any = {};
+      // Use a union type for login/signup body
+      type AuthBody =
+        | { email: string; password: string } // login
+        | { name: string; email: string; password: string }; // signup
+
+      let bodyData: AuthBody;
 
       if (mode === "login") {
-        // login needs only email + password
         bodyData = {
           email: form.email,
           password: form.password,
         };
       } else if (mode === "signup") {
-        // signup needs name + email + password
         bodyData = {
           name: form.name,
           email: form.email,
           password: form.password,
         };
+      } else {
+        throw new Error("Invalid mode");
       }
+
       const res = await fetch(`/api/auth/${mode}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -44,7 +50,7 @@ export default function AuthPage() {
 
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        throw new Error(data.message || `${mode} failed`);
+        throw new Error((data as { message?: string }).message || `${mode} failed`);
       }
 
       // ✅ redirect on success
@@ -95,16 +101,16 @@ export default function AuthPage() {
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-4 transition-all duration-500">
-          {mode=="signup" &&(
-          <input
-            type="text"
-            name="name"
-            placeholder="Name"
-            value={form.name}
-            onChange={handleChange}
-            required
-            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
+          {mode == "signup" && (
+            <input
+              type="text"
+              name="name"
+              placeholder="Name"
+              value={form.name}
+              onChange={handleChange}
+              required
+              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
           )}
 
 
