@@ -9,6 +9,7 @@ export default function AuthPage() {
   const [form, setForm] = useState({ name: "", email: "", password: "" });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -43,8 +44,6 @@ export default function AuthPage() {
         throw new Error("Invalid mode");
       }
 
-      console.log("Sending bodyData:", bodyData);
-
       const res = await fetch(`/api/auth/${mode}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -56,8 +55,13 @@ export default function AuthPage() {
         console.error("Signup/Login error response:", data);
         throw new Error((data as { message?: string }).message || `${mode} failed`);
       }
-
+      if(mode ==="signup"){
+        setMode("login");
+        setSuccess("successfully signed up, Now loginIn");
+        setForm({ name: "", email: "", password: "" })
+      }else{
       router.push("/");
+      }
     } catch (err: unknown) {
       if (err instanceof Error) {
         setError(err.message);
@@ -100,6 +104,9 @@ export default function AuthPage() {
         {/* Error */}
         {error && (
           <p className="text-red-500 text-sm text-center mb-4">{error}</p>
+        )}
+        {success && (
+          <p className="text-green-500 text-sm text-center mb-4">{success}</p>
         )}
 
         {/* Form */}
