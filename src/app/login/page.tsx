@@ -20,10 +20,9 @@ export default function AuthPage() {
     setError("");
 
     try {
-      // Use a union type for login/signup body
       type AuthBody =
-        | { email: string; password: string } // login
-        | { name: string; email: string; password: string }; // signup
+        | { email: string; password: string }
+        | { name: string; email: string; password: string };
 
       let bodyData: AuthBody;
 
@@ -33,6 +32,8 @@ export default function AuthPage() {
           password: form.password,
         };
       } else if (mode === "signup") {
+        // Ensure form.name exists
+        if (!form.name) throw new Error("Name is required for signup");
         bodyData = {
           name: form.name,
           email: form.email,
@@ -42,6 +43,8 @@ export default function AuthPage() {
         throw new Error("Invalid mode");
       }
 
+      console.log("Sending bodyData:", bodyData);
+
       const res = await fetch(`/api/auth/${mode}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -50,10 +53,10 @@ export default function AuthPage() {
 
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
+        console.error("Signup/Login error response:", data);
         throw new Error((data as { message?: string }).message || `${mode} failed`);
       }
 
-      // ✅ redirect on success
       router.push("/");
     } catch (err: unknown) {
       if (err instanceof Error) {
